@@ -114,7 +114,7 @@ class TestNormalizeDates:
         df_dedup = remove_duplicates(sample_df)
         df_clean = handle_missing_values(df_dedup)
         result = normalize_dates(df_clean)
-        assert result["date"].dtype == object  # object = string in pandas
+        assert pd.api.types.is_string_dtype(result["date"])
 
 
 class TestStandardizeColumns:

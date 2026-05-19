@@ -102,8 +102,8 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     original_count = len(df)
     # Drop rows missing critical columns
     df = df.dropna(subset=["review", "rating"])
-    # Also drop empty string reviews
-    df = df[df["review"].str.strip().ne("")]
+    # Drop reviews shorter than 3 characters (e.g. "ok", "gd") to remove noise
+    df = df[df["review"].astype(str).str.strip().str.len() >= 3]
 
     removed = original_count - len(df)
     missing_pct = (removed / original_count * 100) if original_count > 0 else 0
@@ -158,6 +158,8 @@ def standardize_columns(df: pd.DataFrame) -> pd.DataFrame:
     }
     df["bank"] = df["bank"].map(bank_map).fillna(df["bank"])
 
+    # Strip whitespaces and use regular expressions to erase trailing .0 decimals
+    df["rating"] = df["rating"].astype(str).str.strip().str.replace(r'\.0$', '', regex=True)
     # Convert rating to integer
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce").astype("Int64")
 
